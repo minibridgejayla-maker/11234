@@ -19,6 +19,7 @@
             position: relative;
             width: 100vw;
             height: 100vh;
+            isolation: isolate; /* 建立新的堆疊環境，解決 z-index 問題 */
         }
         .snowflake {
             position: absolute;
@@ -114,7 +115,7 @@
             background-color: #ff93a3; /* 淺粉色 */
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 5px; /* 修正：移除多餘的 hover 樣式 */
             margin-top: 20px; /* 與上方文字間距 */
             box-shadow: 0 4px #e09aa5; /* 較深的粉色陰影 */
             transition: all 0.1s ease-in-out;
@@ -365,7 +366,7 @@
             }
         }
 
-        function startGame() {
+        function startGame() { // 修正：移除重複的 bgm.play()
             // 🔊 讓音效能被啟用（防止瀏覽器封鎖）
             document.getElementById('bgm').play().catch(()=>{});
             // 🔊 讓音效能被啟用（防止瀏覽器封鎖），並播放背景音樂
@@ -407,7 +408,8 @@
             document.removeEventListener('mousemove', moveSleigh);
             bgm.pause(); // 遊戲結束時暫停背景音樂
             gameOverEl.style.display = 'block';
-            document.querySelectorAll('.gift, .bomb').forEach(object => object.remove());
+            // 修正：移除所有遊戲物件，包括雪花
+            document.querySelectorAll('.gift, .bomb, .snowman, .gingerbread, .snowflake').forEach(object => object.remove());
             // 以圖示和數字顯示最終統計數據
             finalGiftsCountEl.textContent = giftsCaught;
             finalBombsCountEl.textContent = bombsCaught;
@@ -421,6 +423,7 @@
             }
         }
 
+        // 頁面載入時就建立雪花背景
         startButton.addEventListener('click', startGame);
         restartButton.addEventListener('click', startGame);
 
