@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Gift Catch</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #2c3e50;
+            font-family: 'Arial', sans-serif;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        .snowflake {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+        #sleigh {
+            position: absolute;
+            width: 100px;
+            height: 60px;
+            background-color: #8B4513; /* Brown color for the basket */
+            border-top: 10px solid #A0522D; /* Lighter brown for the rim */
+            border-radius: 0 0 20px 20px; /* Rounded bottom corners */
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-sizing: border-box;
+        }
+        .gift {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-image: url('https://img.icons8.com/plasticine/100/000000/gift.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            top: -50px;
+            animation: fall linear;
+        }
+        #ui-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+        }
+        #start-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 48px;
+            text-align: center;
+            display: none;
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(105vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="ui-container">
+            <div id="score">Score: 0</div>
+            <div id="timer">Time: 30</div>
+        </div>
+        <button id="start-button">Start Game</button>
+        <div id="sleigh"></div>
+        <div id="game-over">
+            Game Over!
+            <button id="restart-button">Restart</button>
+        </div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const sleigh = document.getElementById('sleigh');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const startButton = document.getElementById('start-button');
+        const gameOverEl = document.getElementById('game-over');
+        const restartButton = document.getElementById('restart-button');
+
+        let score = 0;
+        let timeLeft = 30;
+        let gameInterval;
+        let giftInterval;
+        let timerInterval;
+        let gameActive = false;
+
+        function createSnowflakes() {
+            for (let i = 0; i < 100; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                const size = Math.random() * 4 + 1;
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                snowflake.style.left = `${Math.random() * 100}vw`;
+                snowflake.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                snowflake.style.animationDelay = `${Math.random() * -5}s`;
+                gameContainer.appendChild(snowflake);
+            }
+        }
+
+        function moveSleigh(e) {
+            const gameRect = gameContainer.getBoundingClientRect();
+            let x = e.clientX - gameRect.left;
+            if (x < 0) x = 0;
+            if (x > gameRect.width - sleigh.offsetWidth) x = gameRect.width - sleigh.offsetWidth;
+            sleigh.style.left = `${x}px`;
+        }
+
+        function createGift() {
+            if (!gameActive) return;
+
+            const gift = document.createElement('div');
+            gift.classList.add('gift');
+            gift.style.left = `${Math.random() * (window.innerWidth - 40)}px`;
+            gift.style.animationDuration = `${Math.random() * 2 + 2}s`;
+            gameContainer.appendChild(gift);
+
+            gift.addEventListener('animationend', () => {
+                gift.remove();
+            });
+        }
+
+        function checkCollisions() {
+            const sleighRect = sleigh.getBoundingClientRect();
+            const gifts = document.querySelectorAll('.gift');
+            gifts.forEach(gift => {
+                const giftRect = gift.getBoundingClientRect();
+                if (
+                    !(sleighRect.right < giftRect.left ||
+                      sleighRect.left > giftRect.right ||
+                      sleighRect.bottom < giftRect.top ||
+                      sleighRect.top > giftRect.bottom)
+                ) {
+                    gift.remove();
+                    score++;
+                    scoreEl.textContent = `Score: ${score}`;
+                }
+            });
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            timerEl.textContent = `Time: ${timeLeft}`;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function startGame() {
+            gameActive = true;
+            startButton.style.display = 'none';
+            gameOverEl.style.display = 'none';
+            score = 0;
+            timeLeft = 30;
+            scoreEl.textContent = `Score: ${score}`;
+            timerEl.textContent = `Time: ${timeLeft}`;
+
+            document.addEventListener('mousemove', moveSleigh);
+
+            gameInterval = setInterval(checkCollisions, 100);
+            giftInterval = setInterval(createGift, 1000);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameInterval);
+            clearInterval(giftInterval);
+            clearInterval(timerInterval);
+            document.removeEventListener('mousemove', moveSleigh);
+            gameOverEl.style.display = 'block';
+            document.querySelectorAll('.gift').forEach(gift => gift.remove());
+        }
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+
+        createSnowflakes();
+    </script>
+</body>
+</html>
