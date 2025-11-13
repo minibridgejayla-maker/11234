@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Christmas Gift Catch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #2c3e50;
-            font-family: 'Arial', sans-serif;
+            /* 漸層背景，更有層次感 */
+            background: linear-gradient(to top, #09203f 0%, #537895 100%);
+            font-family: 'Comic Neue', cursive; /* 使用更可愛的字體 */
         }
         #game-container {
             position: relative;
@@ -27,14 +31,14 @@
         #sleigh {
             position: absolute;
             width: 100px;
-            height: 60px;
-            background-color: #8B4513; /* Brown color for the basket */
-            border-top: 10px solid #A0522D; /* Lighter brown for the rim */
-            border-radius: 0 0 20px 20px; /* Rounded bottom corners */
+            height: 100px;
+            background-image: url('https://i.postimg.cc/FKYjzjqd/Pngtree-q-version-of-santa-claus-3841265.png');
+            background-size: contain;
+            background-repeat: no-repeat;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            box-sizing: border-box;
+            user-select: none;
         }
         .gift {
             position: absolute;
@@ -46,12 +50,44 @@
             top: -50px;
             animation: fall linear;
         }
+        .bomb {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💣</text></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            top: -50px;
+            animation: fall linear;
+        }
+        .snowman {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⛄</text></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            top: -50px;
+            animation: fall linear;
+        }
+        .gingerbread {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-image: url('https://i.postimg.cc/QCjrsLkf/Pngtree-christmas-gingerbread-man-illustration-6968184.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            top: -50px;
+            animation: fall linear;
+        }
         #ui-container {
             position: absolute;
             top: 20px;
+            right: 20px; /* 將 UI 容器移到右上角 */
             left: 20px;
             color: white;
             font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 文字陰影，更清晰 */
         }
         #start-button {
             position: absolute;
@@ -61,10 +97,30 @@
             font-size: 24px;
             padding: 10px 20px;
             cursor: pointer;
-            background-color: #27ae60;
+            background-color: #e74c3c; /* 喜慶的紅色 */
             color: white;
             border: none;
             border-radius: 5px;
+            box-shadow: 0 4px #c0392b; /* 按鈕立體感 */
+            transition: all 0.1s ease-in-out;
+        }
+        #start-button:hover {
+            background-color: #ff6b5a;
+        }
+        #restart-button {
+            font-size: 24px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #ff93a3; /* 淺粉色 */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px; /* 與上方文字間距 */
+            box-shadow: 0 4px #e09aa5; /* 較深的粉色陰影 */
+            transition: all 0.1s ease-in-out;
+        }
+        #restart-button:hover {
+            background-color: #ffcdd5;
         }
         #game-over {
             position: absolute;
@@ -72,9 +128,48 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
-            font-size: 48px;
+            font-size: 60px; /* 加大字體 */
             text-align: center;
             display: none;
+            background-color: rgba(0, 0, 0, 0.7); /* 讓遊戲結束畫面更明顯 */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        #final-stats-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px; /* 每個統計項目之間的距離 */
+            margin-top: 20px;
+        }
+        .final-stat-line {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* 圖示與數字之間的距離 */
+            font-size: 28px;
+        }
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .gift-icon {
+            background-image: url('https://img.icons8.com/plasticine/100/000000/gift.png');
+        }
+        .bomb-icon {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💣</text></svg>');
+        }
+        .snowman-icon {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⛄</text></svg>');
+        }
+        .gingerbread-icon {
+            background-image: url('https://i.postimg.cc/QCjrsLkf/Pngtree-christmas-gingerbread-man-illustration-6968184.png');
+        }
+        #final-high-score {
+            font-size: 28px; /* 調整最高分字體大小 */
         }
         @keyframes fall {
             to {
@@ -87,15 +182,28 @@
     <div id="game-container">
         <div id="ui-container">
             <div id="score">Score: 0</div>
+            <div id="high-score">High Score: 0</div>
             <div id="timer">Time: 30</div>
         </div>
         <button id="start-button">Start Game</button>
         <div id="sleigh"></div>
         <div id="game-over">
-            Game Over!
+            Merry Christmas!
+            <div id="final-stats-container">
+                <div class="final-stat-line"><div class="stat-icon gift-icon"></div><span id="final-gifts-count">0</span></div>
+                <div class="final-stat-line"><div class="stat-icon bomb-icon"></div><span id="final-bombs-count">0</span></div>
+                <div class="final-stat-line"><div class="stat-icon snowman-icon"></div><span id="final-snowmen-count">0</span></div>
+                <div class="final-stat-line"><div class="stat-icon gingerbread-icon"></div><span id="final-gingerbread-count">0</span></div>
+            </div>
+            <div id="final-high-score">High Score: 0</div>
             <button id="restart-button">Restart</button>
         </div>
     </div>
+
+    <!-- 音效元素 -->
+    <audio id="gift-sound" src="sounds/shine-11-268907.mp3" preload="auto"></audio>
+    <audio id="bomb-sound" src="sounds/smoke-bomb-6761.mp3" preload="auto"></audio>
+    <audio id="bgm" src="sounds/caja-de-musica-316378.mp3" loop></audio>
 
     <script>
         const gameContainer = document.getElementById('game-container');
@@ -105,13 +213,46 @@
         const startButton = document.getElementById('start-button');
         const gameOverEl = document.getElementById('game-over');
         const restartButton = document.getElementById('restart-button');
+        const highScoreEl = document.getElementById('high-score');
+        const finalHighScoreEl = document.getElementById('final-high-score');
+        const finalGiftsCountEl = document.getElementById('final-gifts-count');
+        const finalBombsCountEl = document.getElementById('final-bombs-count');
+        const finalSnowmenCountEl = document.getElementById('final-snowmen-count');
+        const finalGingerbreadCountEl = document.getElementById('final-gingerbread-count');
+        const giftSound = document.getElementById('gift-sound');
+        const bombSound = document.getElementById('bomb-sound');
+        const bgm = document.getElementById('bgm');
+
+        // 將音量設定為最大聲 (範圍 0.0 - 1.0)
+        giftSound.volume = 1.0;
+        bombSound.volume = 1.0;
+        bgm.volume = 0.5; // 背景音樂可以稍微小聲一點
 
         let score = 0;
         let timeLeft = 30;
         let gameInterval;
-        let giftInterval;
+        let objectInterval;
         let timerInterval;
         let gameActive = false;
+        let giftsCaught = 0;
+        let bombsCaught = 0;
+        let snowmenCaught = 0;
+        let gingerbreadCaught = 0;
+        let highScore = 0;
+
+        const HIGHSCORE_KEY = 'christmasGiftCatchHighScore';
+
+        // 載入最高分
+        function loadHighScore() {
+            const storedHighScore = localStorage.getItem(HIGHSCORE_KEY);
+            highScore = storedHighScore ? parseInt(storedHighScore, 10) : 0;
+            highScoreEl.textContent = `High Score: ${highScore}`;
+            finalHighScoreEl.textContent = `High Score: ${highScore}`;
+        }
+
+        function saveHighScore() {
+            localStorage.setItem(HIGHSCORE_KEY, highScore.toString());
+        }
 
         function createSnowflakes() {
             for (let i = 0; i < 100; i++) {
@@ -135,33 +276,82 @@
             sleigh.style.left = `${x}px`;
         }
 
-        function createGift() {
+        function createFallingObject() {
             if (!gameActive) return;
 
-            const gift = document.createElement('div');
-            gift.classList.add('gift');
-            gift.style.left = `${Math.random() * (window.innerWidth - 40)}px`;
-            gift.style.animationDuration = `${Math.random() * 2 + 2}s`;
-            gameContainer.appendChild(gift);
+            const rand = Math.random();
+            const object = document.createElement('div');
 
-            gift.addEventListener('animationend', () => {
-                gift.remove();
+            // 決定要產生的物體類型
+            if (rand < 0.2) { // 20% 機率是炸彈
+                object.classList.add('bomb');
+            } else if (rand < 0.3) { // 10% 機率是雪人
+                object.classList.add('snowman');
+            } else if (rand < 0.4) { // 10% 機率是薑餅人
+                object.classList.add('gingerbread');
+            } else { // 60% 機率是普通禮物
+                object.classList.add('gift');
+            }
+
+            // --- 速度遞增邏輯 ---
+            // 遊戲進度，從 0 (開始) 到接近 1 (結束)
+            const progress = (30 - timeLeft) / 30;
+
+            // 初始速度 (動畫時間較長)
+            const initialMinDuration = 3; // 秒
+            const initialMaxDuration = 5; // 秒
+
+            // 最終速度 (動畫時間較短)
+            const finalMinDuration = 1.5; // 秒
+            const finalMaxDuration = 3;   // 秒
+
+            // 根據遊戲進度，線性計算當前的最小和最大動畫時間
+            const currentMinDuration = initialMinDuration - (initialMinDuration - finalMinDuration) * progress;
+            const currentMaxDuration = initialMaxDuration - (initialMaxDuration - finalMaxDuration) * progress;
+            const randomDuration = Math.random() * (currentMaxDuration - currentMinDuration) + currentMinDuration;
+
+            object.style.left = `${Math.random() * (window.innerWidth - 40)}px`;
+            object.style.animationDuration = `${randomDuration}s`;
+            gameContainer.appendChild(object);
+
+            object.addEventListener('animationend', () => {
+                object.remove();
             });
         }
 
         function checkCollisions() {
             const sleighRect = sleigh.getBoundingClientRect();
-            const gifts = document.querySelectorAll('.gift');
-            gifts.forEach(gift => {
-                const giftRect = gift.getBoundingClientRect();
+            const fallingObjects = document.querySelectorAll('.gift, .bomb, .snowman, .gingerbread');
+            fallingObjects.forEach(object => {
+                const objectRect = object.getBoundingClientRect();
                 if (
-                    !(sleighRect.right < giftRect.left ||
-                      sleighRect.left > giftRect.right ||
-                      sleighRect.bottom < giftRect.top ||
-                      sleighRect.top > giftRect.bottom)
+                    !(sleighRect.right < objectRect.left ||
+                      sleighRect.left > objectRect.right ||
+                      sleighRect.bottom < objectRect.top ||
+                      sleighRect.top > objectRect.bottom)
                 ) {
-                    gift.remove();
-                    score++;
+                    if (object.classList.contains('snowman')) {
+                        score += 2; // 接到雪人或薑餅人得 2 分
+                        snowmenCaught++;
+                        giftSound.currentTime = 0;
+                        giftSound.play();
+                    } else if (object.classList.contains('gingerbread')) {
+                        score += 2;
+                        gingerbreadCaught++;
+                        giftSound.currentTime = 0;
+                        giftSound.play();
+                    } else if (object.classList.contains('gift')) {
+                        score++;
+                        giftsCaught++;
+                        giftSound.currentTime = 0;
+                        giftSound.play();
+                    } else if (object.classList.contains('bomb')) {
+                        score--;
+                        bombsCaught++;
+                        bombSound.currentTime = 0;
+                        bombSound.play();
+                    }
+                    object.remove();
                     scoreEl.textContent = `Score: ${score}`;
                 }
             });
@@ -176,34 +366,65 @@
         }
 
         function startGame() {
+            // 🔊 讓音效能被啟用（防止瀏覽器封鎖）
+            document.getElementById('bgm').play().catch(()=>{});
+            // 🔊 讓音效能被啟用（防止瀏覽器封鎖），並播放背景音樂
+            bgm.play().catch(()=>{});
+            giftSound.play().catch(() => {});
+            bombSound.play().catch(() => {});
+            giftSound.pause();
+            bombSound.pause();
+            giftSound.currentTime = 0;
+            bombSound.currentTime = 0;
+            bgm.currentTime = 0; // 從頭開始播放背景音樂
+
             gameActive = true;
             startButton.style.display = 'none';
             gameOverEl.style.display = 'none';
             score = 0;
             timeLeft = 30;
+            giftsCaught = 0; // 重置計數器
+            bombsCaught = 0;
+            snowmenCaught = 0;
+            gingerbreadCaught = 0;
             scoreEl.textContent = `Score: ${score}`;
             timerEl.textContent = `Time: ${timeLeft}`;
+            loadHighScore(); // 遊戲開始時顯示當前最高分
 
             document.addEventListener('mousemove', moveSleigh);
 
             gameInterval = setInterval(checkCollisions, 100);
-            giftInterval = setInterval(createGift, 1000);
+            objectInterval = setInterval(createFallingObject, 1000);
             timerInterval = setInterval(updateTimer, 1000);
         }
+
 
         function endGame() {
             gameActive = false;
             clearInterval(gameInterval);
-            clearInterval(giftInterval);
+            clearInterval(objectInterval);
             clearInterval(timerInterval);
             document.removeEventListener('mousemove', moveSleigh);
+            bgm.pause(); // 遊戲結束時暫停背景音樂
             gameOverEl.style.display = 'block';
-            document.querySelectorAll('.gift').forEach(gift => gift.remove());
+            document.querySelectorAll('.gift, .bomb').forEach(object => object.remove());
+            // 以圖示和數字顯示最終統計數據
+            finalGiftsCountEl.textContent = giftsCaught;
+            finalBombsCountEl.textContent = bombsCaught;
+            finalSnowmenCountEl.textContent = snowmenCaught;
+            finalGingerbreadCountEl.textContent = gingerbreadCaught;
+
+            if (score > highScore) {
+                highScore = score;
+                saveHighScore();
+                loadHighScore(); // 更新並顯示新的最高分
+            }
         }
 
         startButton.addEventListener('click', startGame);
         restartButton.addEventListener('click', startGame);
 
+        loadHighScore(); // 頁面載入時就顯示最高分
         createSnowflakes();
     </script>
 </body>
