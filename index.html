@@ -242,29 +242,102 @@
             margin: 10px auto;
             width: 80%;
         }
-        
+        /* Modal 背景 */
+#leaderboard-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+   
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.5);
+    border: 5px solid #ff6b81; /* 聖誕花邊感 */
+    text-align: center;
+    font-family: 'Comic Neue', cursive;
+    z-index: 9999;
+}
+
+/* 標題 */
+#leaderboard-modal h2 {
+    font-size: 28px;
+    color: #e74c3c; /* 紅色 */
+    text-shadow: 2px 2px #f9e79f; /* 金色陰影 */
+    margin-bottom: 20px;
+}
+
+/* 名字輸入框 */
+#player-name-input {
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 1px;
+    border: 3px dashed #27ae60; /* 綠色聖誕感邊框 */
+    border-radius: 15px;
+    background: #fffaf0; /* 淺黃色背景 */
+    padding: 8px 12px;
+    margin-bottom: 15px;
+    width: 60%;
+}
+
+/* 送出按鈕 */
+#save-name-button,
+#close-leaderboard {
+    font-family: 'Comic Neue', cursive;
+    font-size: 18px;
+    padding: 10px 20px;
+    background: #e74c3c; /* 紅色按鈕 */
+    color: #fff;
+    border-radius: 10px;
+    border: 2px solid #f1c40f; /* 黃色邊框 */
+    cursor: pointer;
+    margin: 5px;
+    box-shadow: 0 4px #c0392b;
+    transition: 0.2s;
+}
+
+#save-name-button:hover,
+#close-leaderboard:hover {
+    background: #ff6b81;
+}
+
+/* 排行榜列表 */
+#leaderboard-list {
+    list-style: none; /* 不要預設數字，改自己加 */
+    padding: 0;
+    margin-top: 15px;
+}
+
+#leaderboard-list li {
+    font-size: 20px;
+    color: #d35400; /* 橘紅色 */
+    margin: 6px 0;
+    text-shadow: 1px 1px #f9e79f; /* 金色陰影，像聖誕亮片 */
+    border-bottom: 1px dashed #27ae60; /* 綠色花邊線 */
+    padding: 4px 0;
+}
+
         @keyframes fall { to { transform: translateY(105vh); } }
     </style>
 </head>
 <body>
-  
-        <!-- 玩家名字輸入視窗 -->
-    <div id="name-modal" class="modal">
-        <div class="modal-content">
-            <h2>輸入你的名字</h2>
-            <input id="player-name-input" type="text" placeholder="您的名字">
-            <button id="save-name-button">開始遊戲</button>
-        </div>
+  <!-- 玩家名字輸入視窗 -->
+<div id="name-modal" class="modal">
+    <div class="modal-content christmas">
+        <h2>🎅 輸入你的名字 🎅</h2>
+        <input id="player-name-input" type="text" placeholder="您的名字">
+        <button id="save-name-button">送出</button>
     </div>
+</div>
 
-    <!-- 排行榜 -->
-    <div id="leaderboard-modal" class="modal">
-        <div class="modal-content">
-            <h2>排行榜（前五名）</h2>
-            <ol id="leaderboard-list"></ol>
-            <button id="close-leaderboard">關閉</button>
-        </div>
+<!-- 排行榜 -->
+<div id="leaderboard-modal" class="modal">
+    <div class="modal-content christmas">
+        <h2>🎄 聖誕排行榜 🎄</h2>
+        <ol id="leaderboard-list"></ol>
+        <button id="close-leaderboard">關閉</button>
     </div>
+</div>
+
 
     <div id="game-container">
         <div id="ui-container">
