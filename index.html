@@ -134,16 +134,138 @@
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 80px;
-            color: white;
+            color: rgb(210, 246, 254);
             display: none;
             text-shadow: 4px 4px 10px rgba(0,0,0,0.7);
             z-index: 9999;
         }
+        /* ===== 排行榜與輸入名字彈窗樣式 ===== */
+        /* 名字輸入框 & 排行榜文字可愛風格 */
+        #player-name-input,
+        #save-name-button,
+        #leaderboard-list,
+        #leaderboard-modal h2 {
+            font-family: 'Comic Neue', cursive; /* 可愛字體 */
+        }
 
+        /* 名字輸入框 */
+        #player-name-input {
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 1px;   /* 多一點字距，看起來活潑 */
+            border: 2px solid #ff6b81;
+            background: #7bd4ed;   /* 淺粉色背景 */
+        }
+
+        /* 排行榜標題 */
+        #leaderboard-modal h2 {
+            color: #ff6b81;       /* 喜慶粉色 */
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        /* 排行榜名單 */
+        #leaderboard-list li {
+            font-size: 20px;
+            color: #432cc7;
+            margin: 6px 0;
+        }
+
+        /* 按鈕 */
+        #save-name-button,
+        #close-leaderboard {
+            font-family: 'Comic Neue', cursive;
+            font-size: 18px;
+            padding: 10px 20px;
+            background: #ff6b81;
+            color: white;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px #8dd5f4;
+            transition: 0.2s;
+        }
+
+        #save-name-button:hover,
+        #close-leaderboard:hover {
+            background: #ff93a3;
+        }
+
+        .modal {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        }
+
+        #player-name-input {
+            width: 80%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        #save-name-button,
+        #close-leaderboard {
+            padding: 10px 20px;
+            background: #3c8cdc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #save-name-button:hover,
+        #close-leaderboard:hover {
+            background: #eb649c;
+        }
+
+        #leaderboard-list {
+            text-align: left;
+            margin: 10px auto;
+            width: 80%;
+        }
+        
         @keyframes fall { to { transform: translateY(105vh); } }
     </style>
 </head>
 <body>
+  
+        <!-- 玩家名字輸入視窗 -->
+    <div id="name-modal" class="modal">
+        <div class="modal-content">
+            <h2>輸入你的名字</h2>
+            <input id="player-name-input" type="text" placeholder="您的名字">
+            <button id="save-name-button">開始遊戲</button>
+        </div>
+    </div>
+
+    <!-- 排行榜 -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content">
+            <h2>排行榜（前五名）</h2>
+            <ol id="leaderboard-list"></ol>
+            <button id="close-leaderboard">關閉</button>
+        </div>
+    </div>
+
     <div id="game-container">
         <div id="ui-container">
             <div id="score">Score: 0</div>
@@ -353,31 +475,122 @@
             timerInterval = setInterval(updateTimer, 1000);
         });
     }
+            // === 玩家名字輸入彈窗 ===
+        const nameModal = document.getElementById("name-modal");
+        const nameInput = document.getElementById("player-name-input");
+        const saveNameBtn = document.getElementById("save-name-button");
+        saveNameBtn.textContent = "送出";
+        // === 排行榜彈窗 ===
+        const leaderboardModal = document.getElementById("leaderboard-modal");
+        const leaderboardList = document.getElementById("leaderboard-list");
+        const closeLeaderboardBtn = document.getElementById("close-leaderboard");
+
+
+        // 🔥 呼叫這個在 "遊戲結束時"
+        function onGameOver(finalScore) {
+            // 顯示輸入名字視窗
+            nameModal.style.display = "flex";
+
+            // 按下儲存名字 → 存進排行榜
+            saveNameBtn.onclick = function () {
+                const playerName = nameInput.value.trim();
+                if (playerName === "") return alert("請輸入名字");
+
+                saveScore(playerName, finalScore);
+
+                nameModal.style.display = "none"; // 關閉名字視窗
+                showLeaderboard();                // 跳出排行榜
+            };
+        }
+
+
+        // === 儲存玩家分數（存入 localStorage） ===
+        function saveScore(name, score) {
+            let records = JSON.parse(localStorage.getItem("leaderboard")) || [];
+
+            // 加入新紀錄
+            records.push({ name, score });
+
+            // 依分數高低排序
+            records.sort((a, b) => b.score - a.score);
+
+            // 只保留前五名
+            records = records.slice(0, 5);
+
+            // 存回 localStorage
+            localStorage.setItem("leaderboard", JSON.stringify(records));
+        }
+
+
+        // === 顯示排行榜視窗 ===
+        function showLeaderboard() {
+            const records = JSON.parse(localStorage.getItem("leaderboard")) || [];
+
+            leaderboardList.innerHTML = ""; // 清空列表
+
+            records.forEach((item, index) => {
+                const li = document.createElement("li");
+                li.textContent = ` ${item.name} - ${item.score} 分`;
+                leaderboardList.appendChild(li);
+            });
+
+            leaderboardModal.style.display = "flex";
+        }
+
+
+        // === 關閉排行榜 ===
+        closeLeaderboardBtn.onclick = function () {
+            leaderboardModal.style.display = "none";
+        };
 
     function endGame() {
-        gameActive = false;
-        clearInterval(gameInterval);
-        clearInterval(objectInterval);
-        clearInterval(timerInterval);
-        document.removeEventListener('mousemove', moveSleigh);
-        bgm.pause();
+    gameActive = false;
+    clearInterval(gameInterval);
+    clearInterval(objectInterval);
+    clearInterval(timerInterval);
+    document.removeEventListener('mousemove', moveSleigh);
+    bgm.pause();
 
-        gameOverEl.style.display = 'block';
+    // 顯示遊戲結束畫面
+    gameOverEl.style.display = 'block';
 
-        document.querySelectorAll('.gift, .bomb, .snowman, .gingerbread, .snowflake')
-            .forEach(o => o.remove());
+    // 清除所有掉落物與雪花
+    document.querySelectorAll('.gift, .bomb, .snowman, .gingerbread, .snowflake')
+        .forEach(o => o.remove());
 
-        finalGiftsCountEl.textContent = giftsCaught;
-        finalBombsCountEl.textContent = bombsCaught;
-        finalSnowmenCountEl.textContent = snowmenCaught;
-        finalGingerbreadCountEl.textContent = gingerbreadCaught;
+    // 顯示最終統計數字
+    finalGiftsCountEl.textContent = giftsCaught;
+    finalBombsCountEl.textContent = bombsCaught;
+    finalSnowmenCountEl.textContent = snowmenCaught;
+    finalGingerbreadCountEl.textContent = gingerbreadCaught;
 
-        if (score > highScore) {
-            highScore = score;
-            saveHighScore();
-            loadHighScore();
-        }
+    // 更新最高分
+    if (score > highScore) {
+        highScore = score;
+        saveHighScore();
+        loadHighScore();
     }
+
+    // ------------------------
+    // ⭐ 這裡加入排行榜功能 ⭐
+    // ------------------------
+    // 顯示輸入名字彈窗
+    nameModal.style.display = "flex";
+
+    saveNameBtn.onclick = function () {
+        let playerName = nameInput.value.trim();
+        if (!playerName) playerName = "玩家";
+        if (playerName.length > 10) playerName = playerName.substring(0, 10);
+
+        // 存入排行榜
+        saveScore(playerName, score);
+
+        // 關閉名字輸入視窗，顯示排行榜
+        nameModal.style.display = "none";
+        showLeaderboard();
+    };
+}
+
 
     startButton.addEventListener('click', startGame);
     restartButton.addEventListener('click', startGame);
